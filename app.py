@@ -1,7 +1,9 @@
 import streamlit as st
+import Stats
 import random
 import time
-goal_word_list = ["apple", "grape", "peach", "mango", "berry","lemon", "melon", "cherry", "hello", "pearl"]
+
+goal_word_list = ["apple", "grape", "peach", "mango", "berry","lemon", "melon", "cherry", "hello", "pearl","fruit", "plant", "table", "chair", "couch", "piano", "drums", "flute"]
 
 if "goal_word" not in st.session_state:
     st.session_state["goal_word"] = random.choice(goal_word_list)
@@ -22,8 +24,12 @@ if submit:
         elif input_word.lower() == st.session_state["goal_word"]:
             st.write("Congratulations! You guessed the correct word!: " + st.session_state["goal_word"])
             st.balloons()
-            time.sleep(5)
+            st.session_state["goal_word"] = ()
+            st.session_state["goal_word"] = random.choice(goal_word_list)            
+            time.sleep(3)
             #goal_word = goal_word_list.random.choice(goal_word_list)
+            st.info("A new word is beeing selected.")
+            time.sleep(3)
             st.rerun()
         else:
             st.write("Try again!")
@@ -42,8 +48,12 @@ if submit:
         st.write(f"You got {guessed_letters} correct letters.")
         st.write(f"You got {wrong_positions} right letters in the wrong position.")
 
+st.write(f"Goal word: {st.session_state["goal_word"]}")
+
 #if input_word.lower() not in goal_word_list:
 #    goal_word_list.append(input_word.lower())'''
 
 #if stats:
- #   streamlit.run 
+#    st.run(stats.py)
+if stats:
+    st.switch_page("Stats")
