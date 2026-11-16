@@ -1,20 +1,54 @@
 import streamlit as st
 import random
 import time
+import os
+from openai import OpenAI
+from pages import stats
+
+
+
+# ── ask for API Key, stop if not yet provided  ────────────────────────────────────────────
+
+with st.sidebar:
+    api_key = st.text_input(
+        "UOS AI API-Key",
+        type="password",
+        key="uos_api_key",
+        placeholder="sk-...",
+    ).strip()
+
+if not api_key:
+    st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
+    st.stop()
+ 
+# pass the entered key
+client = OpenAI(
+    base_url="https://litellm.uni-osnabrueck.de/v1",
+    api_key=api_key
+)
+
+resp = client.chat.completions.create(
+    model="google/gemma-4-E4B-it",
+    max_tokens=1000,
+    messages=[{"role": "user", "content": "Give me a random word with 5 letters. Please only answer with the word, no other text."},],
+)
+test = resp.choices[0].message.content
+
+# ── Main program logic starts here ────────────────────
 
 # List of possible goal words
-goal_word_list = ["apple", "grape", "peach", "mango", "berry", "lemon", "melon", "hello", "pearl", "fruit", "plant", "table", "chair", "couch", "piano", "drums", "flute"]
+#goal_word_list = ["apple", "grape", "peach", "mango", "berry", "lemon", "melon", "hello", "pearl", "fruit", "plant", "table", "chair", "couch", "piano", "drums", "flute"]
 
 # Check if a goal word is already set in the session state, if not, select a random word from the list
 if "goal_word" not in st.session_state:
-    st.session_state["goal_word"] = random.choice(goal_word_list)
+    st.session_state["goal_word"] = test.lower()           #random.choice(goal_word_list)
     st.info("A new word has been selected.")
 
 # Initialize variables 
 guessed_letters = 0
 wrong_positions = 0
-letter_safe = 0
-letter_compare = 0
+letter_safe_goal = 0
+letter_safe_input = 0
 
 # Streamlit app layout
 st.title("Word guesser")
@@ -38,11 +72,11 @@ if submit:
             st.balloons()
             # Reset goal word & select a new one
             st.session_state["goal_word"] = ()
-            st.session_state["goal_word"] = random.choice(goal_word_list)            
+            st.session_state["goal_word"] = test.lower()            #random.choice(goal_word_list)            
             time.sleep(3)
-            st.info("A new word is beeing selected.")
-            time.sleep(3)
-            st.rerun()
+            with st.spinner("A new word is being selected …"):
+                time.sleep(3)
+                st.rerun()
         else:
             st.write("Try again!")
 
@@ -57,16 +91,16 @@ if submit:
                     # Count the number of occurrences of the letter in the goal word
                     for x in range (5):
                         if st.session_state["goal_word"][x] == input_word[j]:
-                            letter_safe += 1
+                            letter_safe_goal += 1
                             # Count the number of occurrences of the letter in the input word
                             for y in range (5):
                                 if input_word[y] == input_word[j]:
-                                    letter_compare += 1
+                                    letter_safe_input += 1
                                     # Determine the minimum of the two counts to avoid overcounting letters
-                                    if letter_safe < letter_compare:
-                                        wrong_positions = letter_safe
+                                    if letter_safe_goal < letter_safe_input:
+                                        wrong_positions = letter_safe_goal
                                     else:
-                                        wrong_positions = letter_compare
+                                        wrong_positions = letter_safe_input
 
         # Display results                    
         st.write(f"You got {guessed_letters} correct letters in the correct position.")
@@ -78,5 +112,6 @@ st.write(f"Goal word: {st.session_state["goal_word"]}")
 
 # Navigate to the stats page if the "Stats" button is clicked
 if stats:
-    st.switch_page("Stats")
-
+    st.switch_page("pages/stats.py")
+    st.title("stats")
+    st.write("How you're doing so far!")

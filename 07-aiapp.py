@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI, AuthenticationError, OpenAIError
+import openai
 
 st.set_page_config(page_title="Meine KI-App")
 
@@ -17,7 +17,7 @@ if not api_key:
     st.stop()
 
 # pass the entered key
-client = OpenAI(
+client = openai.OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",
     api_key=api_key
 )
@@ -39,10 +39,10 @@ if st.button("Submit", disabled=not prompt.strip()):
 
         st.write(response.choices[0].message.content)
 
-    except AuthenticationError:
+    except openai.AuthenticationError:
         st.error("API was not accept. Please check it.")
 
-    except OpenAIError:
+    except openai.OpenAIError:
         st.error(
             "AI API request failed. Please check it and try again. "
         )
