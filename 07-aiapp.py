@@ -15,7 +15,7 @@ with st.sidebar:
 if not api_key:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
     st.stop()
-
+ 
 # pass the entered key
 client = openai.OpenAI(
     base_url="https://litellm.uni-osnabrueck.de/v1",

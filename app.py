@@ -3,7 +3,6 @@ import random
 import time
 import os
 from openai import OpenAI
-from pages import stats
 
 
 
@@ -32,7 +31,7 @@ resp = client.chat.completions.create(
     max_tokens=1000,
     messages=[{"role": "user", "content": "Give me a random word with 5 letters. Please only answer with the word, no other text."},],
 )
-test = resp.choices[0].message.content
+chosen_word = resp.choices[0].message.content
 
 # ── Main program logic starts here ────────────────────
 
@@ -41,7 +40,7 @@ test = resp.choices[0].message.content
 
 # Check if a goal word is already set in the session state, if not, select a random word from the list
 if "goal_word" not in st.session_state:
-    st.session_state["goal_word"] = test.lower()           #random.choice(goal_word_list)
+    st.session_state["goal_word"] = chosen_word.lower()           #random.choice(goal_word_list)
     st.info("A new word has been selected.")
 
 # Initialize variables 
@@ -54,7 +53,7 @@ letter_safe_input = 0
 st.title("Word guesser")
 st.write("Guess a word with 5 Letters.")
 submit = st.button("submit")
-stats = st.button("Stats")
+#stats = st.button("Stats")
 
 # User input for guessing the word
 input_word = st.text_input("Enter your guess here:")
@@ -72,7 +71,7 @@ if submit:
             st.balloons()
             # Reset goal word & select a new one
             st.session_state["goal_word"] = ()
-            st.session_state["goal_word"] = test.lower()            #random.choice(goal_word_list)            
+            st.session_state["goal_word"] = chosen_word.lower()            #random.choice(goal_word_list)            
             time.sleep(3)
             with st.spinner("A new word is being selected …"):
                 time.sleep(3)
@@ -110,8 +109,4 @@ if submit:
 st.write(f"Goal word: {st.session_state["goal_word"]}")
 # DELETE !!!
 
-# Navigate to the stats page if the "Stats" button is clicked
-if stats:
-    st.switch_page("pages/stats.py")
-    st.title("stats")
-    st.write("How you're doing so far!")
+
