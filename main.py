@@ -10,7 +10,7 @@ with st.sidebar:
         type="password",
         key="uos_api_key",
         placeholder="sk-...",
-    ).strip()
+    ).strip()    
 
 if not api_key:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")

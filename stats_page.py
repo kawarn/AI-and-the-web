@@ -1,22 +1,39 @@
 import streamlit as st
 # Stats page for the guessing game app
 st.title("Stats Page")
-st.info("your game statistics will be displayed here.")
+st.info("Your game statistics:")
+
+# Calculate statistics 
+games_played = st.session_state.get("games_played", 0)
+guessed_words = st.session_state.get("wordbank", [])
+average_guesses = st.session_state.get("average_guesses", 0)
+
+# Quality of guesses
+score = 100
+if average_guesses > 10:
+    score -= (average_guesses - 10) * 5
+
+if st.session_state.get("Average_quality", 0) > 0:
+    score += st.session_state["Average_quality"]
+
+if score >= 100:
+    score = 100
 
 total_guesses_per_game = st.session_state.get("total_guesses_per_game", [])
 st.write(f"Total guesses per game: {total_guesses_per_game}")
-st.bar_chart(st.session_state["total_guesses_per_game"], use_container_width=True)
 
-average_guesses = st.session_state.get("average_guesses", 0)
-st.write(f"Your average guesses: {average_guesses}")
+# display bar chart of total guesses per game
+st.bar_chart(st.session_state["total_guesses_per_game"], use_container_width=True) 
 
-games_played = st.session_state.get("games_played", 0)
-st.write(f"You have played {games_played} games.")
+# display statistics
+st.table({
+    "Games Played": [games_played],
+    "Average Guesses": [f"{average_guesses:.2f}"],
+    "Guessed Words": [guessed_words],
+    "Qualityscore": [f"{st.session_state.get('score', 0):.2f}"]
+})
 
-guessed_words = st.session_state.get("wordbank", [])
-st.write(f"Guessed words: {guessed_words}")
-
-# Quality of guesses
+st.caption("*The Qualityscore contains a maximum of 100 points with additional points for correct letters and minus points for too many wrong guesses")
 
 # initialize counters for good, average, and bad games
 bad_games = 0
@@ -24,10 +41,10 @@ average_games = 0
 good_games = 0
 
 st.title("Quality of your guesses")
-st.info("This section provides feedback on the quality of your guesses based on the number of attempts made.")
+st.info("Feedback on the quality of your guesses based on the number of attempts made:")
 
 for i in range(len(total_guesses_per_game)):
-    if total_guesses_per_game[i] < average_guesses - 5 or total_guesses_per_game[i] < 5:
+    if total_guesses_per_game[i] < average_guesses - 5 or total_guesses_per_game[i] <= 5:
         good_games += 1
     elif total_guesses_per_game[i] > average_guesses + 5 or total_guesses_per_game[i] < average_guesses - 5:
         average_games += 1

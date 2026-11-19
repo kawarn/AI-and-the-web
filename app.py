@@ -41,7 +41,12 @@ Initialize_session_states("average_guesses", 0)
 Initialize_session_states("games_played", 0)
 Initialize_session_states("wordbank", [])
 Initialize_session_states("guess_count", 0)
+Initialize_session_states("quality_guess", 0)
+Initialize_session_states("Average_quality", 0)
 Initialize_session_states("wrong_words", [])
+Initialize_session_states("notizblock", [])
+
+# st.session_state["notizblock"]
 
 for x in st.session_state["wrong_words"]:
     if x == None:
@@ -54,6 +59,8 @@ st.subheader("Guess a word with 5 Letters.")
 # User input for guessing the word 
 input_word = st.chat_input("Enter your guess here:")
 
+# Notizblock
+notiz_input = st.text_area("Notizblock", value="\n".join(st.session_state["notizblock"]), height=150, width=200, key="notizblock_input")
 
 # Check if word is submitted   
   
@@ -64,7 +71,7 @@ if input_word:
         st.error(error_message)
 
     elif input_word.lower() in st.session_state["wrong_words"]:
-        st.warning("You have already guessed this word. Please try a different one.")   
+        st.error("⚠️ You have already guessed this word. Please try another one. ⚠️")   
         
     # Check if the input word matches the goal word
     elif input_word.lower() == st.session_state["goal_word"]:
@@ -72,6 +79,13 @@ if input_word:
         st.balloons()
         st.session_state["total_guesses_per_game"].append(st.session_state["guess_count"] + 1)
         st.session_state["games_played"] += 1
+        if guessed_letters >= 3:
+            st.session_state["quality_guess"] += 2
+        if wrong_positions >= 3:
+            st.session_state["quality_guess"] += 1
+        st.session_state["Average_quality"] = st.session_state["quality_guess"] / st.session_state["games_played"] if st.session_state["games_played"] > 0 else 0
+        # Save the guessed word to the wordbank 
+        st.session_state["wordbank"].append(st.session_state["goal_word"])
         # Reset goal word & select a new one
         st.session_state["goal_word"] = ()
         st.session_state["goal_word"] = chosen_word.lower()    
@@ -82,7 +96,7 @@ if input_word:
             st.rerun()
     else:
         st.session_state["guess_count"] += 1
-        st.error("❌  Try again!")
+        st.error("❌ Try again!")
         st.session_state["wrong_words"].append(input_word)
         
         # Count the number of correct letters in the correct position
@@ -107,14 +121,17 @@ if input_word:
                                     else:
                                         wrong_positions = letter_safe_input
 
-        # Display results    
-        st.write(f"You got {guessed_letters} correct letters in the correct position.")
-        st.write(f"You got {wrong_positions} correct letters in the wrong position.")
+
+        # Display results 
+        st.table ({
+            "correct letters ins the correct position": [guessed_letters],
+            "correct letters in the wrong position": [wrong_positions]
+        })
 
         # Display all guessed words except the last one
         st.info(f"Guessed words so far: {st.session_state['wrong_words']}") 
 
-        st.write(st.session_state["guess_count"])    
+        st.caption(f"Guess count: {st.session_state["guess_count"]}")    
 
 
         # quality of guesses 
@@ -134,12 +151,12 @@ if input_word:
 # Update the average guesses if there are any recorded guesses
 if len(st.session_state["total_guesses_per_game"]) > 0:
     st.session_state["average_guesses"] = sum(st.session_state["total_guesses_per_game"]) / st.session_state["games_played"]
-       
-# Save the guessed word to the wordbank 
-    st.session_state["wordbank"].append(st.session_state["goal_word"])
 
 # !! Display the current goal word for debugging purposes !! - D E L E T E
 st.write(f"Goal word: {st.session_state["goal_word"]}")
 # DELETE !!!
+
+
+
 
 
