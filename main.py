@@ -1,6 +1,4 @@
 import streamlit as st
-import os
-from openai import OpenAI
 
 # ── ask for API Key, stop if not yet provided  ────────────────────────────────────────────
 
@@ -15,7 +13,8 @@ with st.sidebar:
 if not api_key:
     st.info("Please enter your Uni Osnabrück API key. If you don't have one, you can obtain it from https://ai-keys.uni-osnabrueck.de.")
     st.stop()
- 
+
+# implement two pages 
 page1 = st.Page("app.py", title="Guessing game", icon="🎮")
 page2 = st.Page("stats_page.py", title="Statistics", icon="📈")
 
