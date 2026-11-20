@@ -45,6 +45,13 @@ Initialize_session_states("Average_quality", 0)
 Initialize_session_states("wrong_words", [])
 Initialize_session_states("notes", [])
 
+def count_wrong(x, i, goal_list, user_list, counter):
+    if goal_list[x] == user_list[i] and x != i and user_list[i] is not None:
+        counter += 1
+        goal_list[x] = None
+        user_list[i] = None
+    return counter, goal_list, user_list
+
 # deletes empty slots
 for x in st.session_state["wrong_words"]:
     if x == None:
@@ -111,40 +118,39 @@ if input_word:
         st.session_state["guess_count"] += 1
         st.error("❌ Try again!")
         st.session_state["wrong_words"].append(input_word)
+
+        goal_word_safe = list(st.session_state["goal_word"])
+        input_word_list = list(input_word)
+
+        current_guessed_letters = 0
+        current_wrong_positions = 0
         
         # Count the number of correct letters in the correct position
-        for i in range (5):
-            if st.session_state["goal_word"][i] == input_word[i]:
-                guessed_letters += 1     
+        for i in range(5):
+            if goal_word_safe[i] == input_word_list[i]:
+                current_guessed_letters += 1
+                goal_word_safe[i] = None     
 
-            # if st.session_state["goal_word"][i] = input_word[i]:
+            # Count the number of correct letters in the wrong position            
+        
+        for j in range (5):
+            if input_word_list[j] is not None:
+                for x in range(5):
+                    current_wrong_positions, goal_word_safe, input_word_list = count_wrong(
+                    x, j, goal_word_safe, input_word_list, current_wrong_positions
+                    )
 
-            # Count the number of correct letters in the wrong position          
-            for j in range (5):
-
-                # Check if the letter in the input word matches a letter in the goal word but is in the wrong position
-                if st.session_state["goal_word"][i] == input_word[j] and i != j and input_word[j] != st.session_state["goal_word"][j] and input_word[j]:
-                    
-                    # Count the number of occurrences of the letter in the goal word
-                    for x in range (5):
-                        if st.session_state["goal_word"][x] == input_word[j] and st.session_state["goal_word"][x] != input_word[x]:
-                            letter_safe_goal += 1
-                            
-                            # Count the number of occurrences of the letter in the input word
-                            if input_word[x] == input_word[j]:
-                                letter_safe_input += 1
-                                
-                                # Determine the minimum of the two counts to avoid overcounting letters
-                                if letter_safe_goal < letter_safe_input:
-                                    wrong_positions = letter_safe_goal
-                                else:
-                                    wrong_positions = letter_safe_input
-
+        guessed_letters = current_guessed_letters
+        wrong_positions = current_wrong_positions
+            
         # Display results 
         st.table ({
-            "correct letters ins the correct position": [guessed_letters],
+            "correct letters in the correct position": [guessed_letters],
             "correct letters in the wrong position": [wrong_positions]
         })
+
+        st.info(f"Guessed words so far: {st.session_state['wrong_words']}") 
+        st.caption(f"Guess count: {st.session_state['guess_count']}")
 
         # Display all guessed words except the last one
         st.info(f"Guessed words so far: {st.session_state['wrong_words']}") 
